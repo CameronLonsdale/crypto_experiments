@@ -76,13 +76,13 @@ class Interactive:
 
     def move_up(self):
         self.level -= 1
-        if self.index < 0:
-            self.index = len(self.texts) - 1
+        if self.level < 0:
+            self.level = len(self.texts) - 1
 
     def move_down(self):
         self.level += 1
-        if self.index >= len(self.texts[self.level]) - 1:
-            self.index = 0
+        if self.level >= len(self.texts) - 1:
+            self.level = 0
 
     def move_left(self):
         self.index -= 1
