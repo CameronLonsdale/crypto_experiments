@@ -5,6 +5,8 @@ class Stage(Enum):
     SELECTION = 1
     REPLACEMENT = 2
 
+KEYS_UP = (curses.KEY_UP,)
+KEYS_DOWN = (curses.KEY_DOWN,)
 KEYS_ENTER = (curses.KEY_ENTER, ord('\n'), ord('\r'))
 KEYS_RIGHT = (curses.KEY_RIGHT,)
 KEYS_LEFT = (curses.KEY_LEFT,)
@@ -16,19 +18,27 @@ class Interactive:
     Manages an interactive decryption session
     '''
 
-    def __init__(self, text, indicator='^', default_index=0, on_change_hook=None):
+    def __init__(self, texts, indicator='^', default_index=0, on_change_hook=None):
         '''Initalise the session'''
-        self.text = text
+        self.texts = texts
         self.indicator = indicator
         self.index = default_index
+        self.level = 0
         self.stage = Stage.SELECTION
         self.on_change_hook = on_change_hook
 
     def get_lines(self):
+        line = []
+        for i in range(len(self.texts)):
+            if i == self.level:
+                line += [self.texts[i], ' ' * self.index + self.indicator]
+            else:
+                line += [self.texts[i]]
+
         if self.stage == Stage.SELECTION:
-            return [self.text, ' ' * self.index + self.indicator, str(self.index)], self.index
+            return line, self.index
         elif self.stage == Stage.REPLACEMENT:
-            line = [self.text, ' ' * self.index + self.indicator, str(self.index), 'Enter replacement letter: ']
+            line += ['Enter replacement letter: ']
             return line, self.index
 
     def draw(self):
@@ -62,16 +72,26 @@ class Interactive:
 
 
     def get_selected(self):
-        return self.text[self.index]
+        return self.texts[self.level][self.index]
+
+    def move_up(self):
+        self.level -= 1
+        if self.index < 0:
+            self.index = len(self.texts) - 1
+
+    def move_down(self):
+        self.level += 1
+        if self.index >= len(self.texts[self.level]) - 1:
+            self.index = 0
 
     def move_left(self):
         self.index -= 1
         if self.index < 0:
-            self.index = len(self.text) - 1
+            self.index = len(self.texts[self.level]) - 1
 
     def move_right(self):
         self.index += 1
-        if self.index >= len(self.text) - 1:
+        if self.index >= len(self.texts[self.level]) - 1:
             self.index = 0
 
     def run_loop(self):
@@ -83,13 +103,17 @@ class Interactive:
                     self.move_right()
                 elif c in KEYS_LEFT:
                     self.move_left()
+                elif c in KEYS_UP:
+                    self.move_up()
+                elif c in KEYS_DOWN:
+                    self.move_down()
                 elif c in KEYS_ENTER:
                     self.stage = Stage.REPLACEMENT
                 elif c == 27:
                     return
 
             elif self.stage == Stage.REPLACEMENT:
-                self.text = self.on_change_hook(self.index, c)
+                self.texts = self.on_change_hook(self.level, self.index, c)
                 self.stage = Stage.SELECTION
 
     def config_curses(self):

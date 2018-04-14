@@ -74,17 +74,15 @@ def partial_decrypt(key, ciphertext):
 ciphertexts.append(bytearray.fromhex(target))
 
 while True:
-    try:
-        index = int(input("Choose ciphertext to break [0 - {}]".format(len(ciphertexts) - 1)))
-    except Exception:
-        continue
 
-    ciphertext = ciphertexts[index]
-
-    def on_change_hook(index, char):
+    def on_change_hook(level, index, char):
         global final_key
-        global ciphertext
+        ciphertext = ciphertexts[level]
         final_key[index] = char ^ ciphertext[index]
-        return ''.join(partial_decrypt(final_key, ciphertext))
 
-    Interactive(''.join(partial_decrypt(final_key, ciphertext)), on_change_hook=on_change_hook).start()
+        texts = [''.join(partial_decrypt(final_key, ciphertext)) for ciphertext in ciphertexts]
+        texts[level] = ''.join(partial_decrypt(final_key, ciphertext))
+        return texts
+
+    partial_decrypts = [''.join(partial_decrypt(final_key, ciphertext)) for ciphertext in ciphertexts]
+    Interactive(partial_decrypts, on_change_hook=on_change_hook).start()
