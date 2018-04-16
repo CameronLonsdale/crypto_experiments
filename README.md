@@ -1,2 +1,2 @@
-# Cameron's Crypto Experiements
+# Cameron's Crypto Experiments
 Attempts at breaking ciphers
