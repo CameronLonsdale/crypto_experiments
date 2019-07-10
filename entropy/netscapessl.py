@@ -1,4 +1,4 @@
-#!/usr/env python3
+#!/usr/bin/env python3
 
 """
 Netscape 1.1 Secure Socket Layer PRNG Implementation
@@ -42,5 +42,6 @@ def generate_random_bytes() -> str:
     stream = hashlib.md5(GLOBAL_SEED.to_bytes(((GLOBAL_SEED.bit_length() + 7) // 8), byteorder='little')).hexdigest()
     GLOBAL_SEED += 1
     return stream
+
 
 print(generate_random_bytes())
