@@ -1,8 +1,6 @@
+#!/usr/env python3
 
-import os
 import hashlib
-
-from datetime import datetime
 
 from functools import partial
 import concurrent.futures
@@ -25,7 +23,7 @@ def create_seed(second, microsecond, pid, ppid) -> int:
 
 
 def crack_microseconds(stream_sample, second, pid, ppid, chunk_size, start):
-    """Brute force through microseconds and calculate the seed to try and 
+    """Brute force through microseconds and calculate the seed to try and
     recalculate the stream sample
     """
     for microsecond in range(start, start + chunk_size + 1):
@@ -61,6 +59,8 @@ def compute_seed() -> str:
     chunksize = MAX_MICROSECONDS // pool_size
     microsecond_start_points = [chunksize * i for i in range(0, pool_size)]
 
+    # Multiprocessing on the microseconds as we want to get through the list of pids as quick as possible
+    # While weighting the earlier pids higher as they're more likely to be correct
     for pid in range(2, MAX_PID + 1):
         print(f"Trying pid: {pid}")
         cracker = partial(crack_microseconds, target_stream, second, pid, ppid, chunksize)
