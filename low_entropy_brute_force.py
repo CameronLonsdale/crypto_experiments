@@ -1,5 +1,12 @@
 #!/usr/env python3
 
+"""
+Brute force search through the parameters which created the seed for a PRNG.
+With low entropy, this is achievable.
+
+Based on https://people.eecs.berkeley.edu/~daw/papers/ddj-netscape.html
+"""
+
 import os
 import hashlib
 from datetime import datetime
